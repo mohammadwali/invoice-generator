@@ -6,5 +6,6 @@
     "body-parser": "1.12.3",
     "express": "4.12.3",
     "log4js": "^0.6.38",
+    "msexcel-builder": "0.0.2"
   }
 }
