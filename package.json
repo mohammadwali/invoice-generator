@@ -7,5 +7,21 @@
     "express": "4.12.3",
     "log4js": "^0.6.38",
     "msexcel-builder": "0.0.2"
-  }
+  },
+  "description": "Automates generating and emailing Invoices",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohammadwali/invoice-generator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mohammadwali/invoice-generator/issues"
+  },
+  "homepage": "https://github.com/mohammadwali/invoice-generator#readme"
 }
