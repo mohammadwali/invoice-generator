@@ -4,7 +4,7 @@ var moment = require("moment");
 var app = express();
 var mongoose = require("mongoose");
 var config = require("./config");
-var dbURI = "mongodb://" + config.db.host + "/" + config.db.name;
+var dbURI = "mongodb://heroku_0n39t29l:d6kjm84q965cpqpar2h99344n8@ds159237.mlab.com:59237/heroku_0n39t29l";
 
 //Creating connection with MongoDB
 mongoose.connect(dbURI);
