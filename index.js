@@ -6,6 +6,7 @@ var mongoose = require("mongoose");
 var config = require("./config");
 var dbURI = "mongodb://heroku_0n39t29l:d6kjm84q965cpqpar2h99344n8@ds159237.mlab.com:59237/heroku_0n39t29l";
 var port = process.env.PORT || 3000;
+var path = require("path");
 
 
 //Creating connection with MongoDB
@@ -20,6 +21,10 @@ mongoose.connection.on("error", onDBError);
 
 // When the connection is disconnected
 mongoose.connection.on("disconnected", onDBClose);
+
+//listings invoices
+app.use('/invoices', express.static(path.join(__dirname, 'invoices')));
+
 
 //adding bodyParser
 app.use(bodyParser.json()); // support json encoded bodies
