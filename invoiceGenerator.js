@@ -2,7 +2,7 @@ var config = require("./config");
 var Q = require("q");
 var path = require("path");
 var moment = require("moment");
-
+var User = require("./models/user.model"); //initialize model
 
 module.exports = invoiceGenerator;
 
@@ -14,7 +14,7 @@ function invoiceGenerator(data) {
     var end = data.endDate;
     var prefix = moment(end, config.dateFormat).format(config.invoices.prefixDateFormat);
     var dirPath = config.invoices.root;
-    var fileName = prefix + "-" + config.invoices.fileName;
+    var fileName = prefix + "-" + config.invoices.fileName;  // TODO add date and time as suffix
     var workbook = excelbuilder.createWorkbook(dirPath, fileName); // Create a new workbook file in current working-path
     var sheet1 = workbook.createSheet("sheet1", 4, 10); // Create a new worksheet with 4 columns and 10 rows
     var currentRowNumber = 1;
@@ -57,19 +57,23 @@ function invoiceGenerator(data) {
                 deferred.reject(err);
             }
 
-            var InvoiceHistory = require("./models/invoiceHistory.model"); //initialize model
-
             var fullPath = path.resolve(path.join(dirPath, fileName));
 
-            new InvoiceHistory({
+
+            User.addInvoice(data.userEmail, {
                 file_name: fileName,
                 full_path: fullPath,
                 total: total,
                 start_date: start,
                 end_date: end
-            });
+            }, function (err) {
 
-            deferred.resolve(fullPath);
+                if (err) {
+                    deferred.reject(err);
+                }
+
+                deferred.resolve(fullPath);
+            });
         }
     }
 

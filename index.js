@@ -26,9 +26,6 @@ app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
 app.use(rootRouteHandler);
 
 
-
-  
-
 // Define main routes
 app.post("/generate", generateInvoice);
 app.post("/user/create/", createUser);
@@ -76,6 +73,7 @@ function generateInvoice(req, res, next) {
 
         invoiceGenerator({
             perWeek: user.pay_info.per_week,
+            userEmail: req.body.email,
             startDate: "10/17/2016", // TODO get last invoice date here
             endDate: moment().format(config.dateFormat), // TODO this will be the closest date possible
             paypalEmail: user.pay_info.paypal_email,
