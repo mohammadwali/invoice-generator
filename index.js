@@ -37,7 +37,7 @@ app.use(notFoundErrorHandler);
 app.use(errorHandler);
 
 // initialize app
-app.listen(80);
+app.listen(process.env.PORT);
 
 // If the Node process ends
 process.on("SIGINT", onProcessEnd);
