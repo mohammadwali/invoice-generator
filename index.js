@@ -5,6 +5,8 @@ var app = express();
 var mongoose = require("mongoose");
 var config = require("./config");
 var dbURI = "mongodb://heroku_0n39t29l:d6kjm84q965cpqpar2h99344n8@ds159237.mlab.com:59237/heroku_0n39t29l";
+var port = process.env.PORT || 3000;
+
 
 //Creating connection with MongoDB
 mongoose.connect(dbURI);
@@ -37,11 +39,13 @@ app.use(notFoundErrorHandler);
 app.use(errorHandler);
 
 // initialize app
-app.listen(process.env.PORT);
+app.listen(port);
 
 // If the Node process ends
 process.on("SIGINT", onProcessEnd);
 
+
+console.log("starting on port", port);
 
 ////////////////////////////////////
 
