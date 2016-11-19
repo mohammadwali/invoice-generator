@@ -87,3 +87,5 @@ fabric.properties
 
 #invoices
 invoices/
+
+data/

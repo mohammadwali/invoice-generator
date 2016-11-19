@@ -6,5 +6,28 @@
     "body-parser": "1.12.3",
     "express": "4.12.3",
     "log4js": "^0.6.38",
-  }
+    "moment": "^2.16.0",
+    "mongodb": "^2.2.11",
+    "mongoose": "^4.6.8",
+    "msexcel-builder": "0.0.2",
+    "q": "^1.4.1"
+  },
+  "description": "Automates generating and emailing invoices",
+  "main": "index.js",
+  "devDependencies": {},
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node --harmony_proxies index.js",
+    "mongo": "mongod --dbpath ./data"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mohammadwali/invoice-generator.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mohammadwali/invoice-generator/issues"
+  },
+  "homepage": "https://github.com/mohammadwali/invoice-generator#readme"
 }
