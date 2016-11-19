@@ -1,19 +1,37 @@
 var express = require("express");
 var bodyParser = require("body-parser");
-var excelbuilder = require("msexcel-builder");
 var moment = require("moment");
 var app = express();
+var mongoose = require("mongoose");
+var config = require("./config");
+var dbURI = "mongodb://" + config.db.host + "/" + config.db.name;
 
+//Creating connection with MongoDB
+mongoose.connect(dbURI);
+
+// CONNECTION EVENTS
+// When successfully connected
+mongoose.connection.on("connected", onDBConnect);
+
+// If the connection throws an error
+mongoose.connection.on("error", onDBError);
+
+// When the connection is disconnected
+mongoose.connection.on("disconnected", onDBClose);
 
 //adding bodyParser
-app.use(bodyParser());
-app.use(bodyParser.json());
-
+app.use(bodyParser.json()); // support json encoded bodies
+app.use(bodyParser.urlencoded({extended: true})); // support encoded bodies
 
 app.use(rootRouteHandler);
 
+
+
+  
+
 // Define main routes
-app.get("/generate", generateInvoice);
+app.post("/generate", generateInvoice);
+app.post("/user/create/", createUser);
 
 // if nothing found show 404
 app.use(notFoundErrorHandler);
@@ -24,82 +42,99 @@ app.use(errorHandler);
 // initialize app
 app.listen(3000);
 
-// uncaught error handler
-process.on("uncaughtException", logError);
+// If the Node process ends
+process.on("SIGINT", onProcessEnd);
 
+
+////////////////////////////////////
+
+function onDBConnect(err) {
+    if (err) throw err;
+    console.log("Mongoose default connection open to " + dbURI);
+}
+
+function onDBError(err) {
+    console.log("Mongoose default connection error: " + err);
+}
+
+function onDBClose() {
+    console.log("Mongoose default connection disconnected");
+}
 
 function generateInvoice(req, res, next) {
-    var dirPath = "./invoices/";
-    var fileName = "invoice.xlsx";  // TODO add date and time as suffix
-    var workbook = excelbuilder.createWorkbook(dirPath, fileName); // Create a new workbook file in current working-path
-    var sheet1 = workbook.createSheet("sheet1", 4, 10); // Create a new worksheet with 4 columns and 10 rows
-    var currentRowNumber = 1;
+    // grab the user model
+    var User = require("./models/user.model");
+    var invoiceGenerator = require("./invoiceGenerator");
 
-    //filling the sheet
-    fillData();
+    //todo checks for email and passwords
 
-    // Save it
-    workbook.save(onWorkBookSave);
+    User.findOne({email: req.body.email, password: req.body.password}, onFind);
+
+    function onFind(err, user) {
+        if (err) throw err;
 
 
-    /////////////////////////
-    function fillData() {
-        addColumns([{title: "Per Week"}, {title: "Weeks"}, {title: "From"}, {title: "To"}]);
-        addColumns(["625", "5", "9/15/2016", "10/17/2016"]);
-        addEmptyRow();
-        addColumns([{title: "Holidays after limit"}, "0"]);
-        addColumns([{title: "Sub-Total"}, "3125"]);
-        addColumns([{title: "Remaining"}, "0"]);
-        addColumns([{title: "Bonus"}, "0"]);
-        addColumns([{title: "Total excluding holidays"}, "3125"]);
-        addEmptyRow();
-        addColumns([{title: "PayPal Email"}, "me@mohammadwali.com"]);
-    }
+        invoiceGenerator({
+            perWeek: user.pay_info.per_week,
+            startDate: "10/17/2016", // TODO get last invoice date here
+            endDate: moment().format(config.dateFormat), // TODO this will be the closest date possible
+            paypalEmail: user.pay_info.paypal_email,
+            holidays: 1
+        }).then(onInvoiceGenerate, onError);
 
-    function onWorkBookSave(err) {
-        if (err) {
+
+        function onInvoiceGenerate(filePath) {
+            console.log("file path", filePath);
             res.send({
-                message: err,
-                type: "error"
-            });
+                "type": "success",
+                "message": "Generated..."
+            })
+        }
+
+
+        function onError(err) {
             throw err;
         }
-        res.send({
-            message: "congratulations, your workbook created",
-            type: "success"
-        });
     }
 
-    function addColumns(items) {
-        var maxColumnWidth = 22;
+}
 
-        // Fill
-        items.forEach(function (text, index) {
-            var column = (index + 1);
-            var isTitle = (text.constructor === Object);
-            var title = isTitle ? text.title : text;
-            var alignTo = isTitle ? "center" : "left";
-            var fontOptions = {name: "arial"};
 
-            if (isTitle) {
-                fontOptions.bold = "true";
+function createUser(req, res, next) {
+    // grab the user model
+    var User = require("./models/user.model");
+
+    // create a new user
+    var newUser = User({
+        name: "Mohammad Wali",
+        email: "wali@brokergenius.com",
+        password: "k2b1k2b1",
+        pay_info: {
+            per_week: "650",
+            paypal_email: "me@mohammadwali.com"
+        },
+        forwarder: {
+            from: "'Mohammad Wali'  <wali@brokergenius.com>", // sender address
+            to: "wali@brokergenius.com, adil@brokergenius.com", // list of receivers
+            smtpConfig: {
+                host: "smtp.gmail.com",
+                port: 465,
+                auth: {
+                    user: "wali@brokergenius.com",
+                    pass: "1229032290"
+                }
             }
+        }
+    });
 
-            sheet1.set(column, currentRowNumber, title);
-            sheet1.font(column, currentRowNumber, fontOptions);
-            sheet1.wrap(column, currentRowNumber, "true");
-            sheet1.valign(column, currentRowNumber, "top");
-//            sheet1.align(column, currentRowNumber, alignTo);
-            sheet1.width(column, maxColumnWidth);
-        });
+    // save the user
+    newUser.save(function (err) {
+        if (err) throw err;
 
-        // update row number
-        currentRowNumber++;
-    }
+        console.log("User created!");
 
-    function addEmptyRow() {
-        addColumns([]);
-    }
+        res.send({"type": "success", "message": "Done"});
+    });
 }
 
 
@@ -111,6 +146,7 @@ function rootRouteHandler(req, res, next) {
         next();
     }
 }
+
 function notFoundErrorHandler(req, res, next) {
     res.status(404);
     res.send({message: "Not found", type: "error"});
@@ -124,6 +160,11 @@ function errorHandler(err, req, res, next) {
     });
 }
 
-function logError(err) {
-    console.log("Caught exception: ", err);
+function onProcessEnd() {
+
+    //close the Mongoose connection
+    mongoose.connection.close(function () {
+        console.log("Mongoose default connection disconnected through app termination");
+        process.exit(0);
+    });
 }
