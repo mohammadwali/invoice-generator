@@ -8,13 +8,13 @@ var fs = require("fs");
 module.exports = invoiceGenerator;
 
 
-function invoiceGenerator(data) {
+function invoiceGenerator(userId, data) {
     var excelbuilder = require("msexcel-builder");
     var deferred = Q.defer();
     var start = data.startDate;
     var end = data.endDate;
     var prefix = moment(end, config.dateFormat).format(config.invoices.prefixDateFormat);
-    var dirPath = getDirPath();
+    var dirPath = getDirPath(userId);
     var fileName = prefix + "-" + config.invoices.fileName;  // TODO add date and time as suffix
     var workbook = excelbuilder.createWorkbook(dirPath, fileName); // Create a new workbook file in current working-path
     var sheet1 = workbook.createSheet("sheet1", 4, 10); // Create a new worksheet with 4 columns and 10 rows
@@ -116,14 +116,19 @@ function invoiceGenerator(data) {
     }
 
 
-    function getDirPath() {
-
-        if (!fs.existsSync(config.invoices.root)) {
-            fs.mkdirSync(config.invoices.root);
-        }
-
-        return config.invoices.root;
+    function getDirPath(userId) {
+        createDir(config.invoices.root);
+        return createDir(path.join(config.invoices.root, userId.toString()));
     }
+
+    function createDir(dir) {
+        if (!fs.existsSync(dir)) {
+            fs.mkdirSync(dir);
+        }
+        return dir;
+    }
+
+
 }
 
 function round(num, dec) {

@@ -80,7 +80,7 @@ function generateInvoice(req, res, next) {
         if (err) throw err;
 
 
-        invoiceGenerator({
+        invoiceGenerator(user._id, {
             perWeek: user.pay_info.per_week,
             userEmail: req.body.email,
             startDate: "10/17/2016", // TODO get last invoice date here
