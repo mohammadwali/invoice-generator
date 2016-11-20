@@ -37,7 +37,7 @@ function invoiceGenerator(userId, data) {
         invoiceData.remaining = parseInt(data.remaining) || 0;
         invoiceData.bonus = parseInt(data.bonus) || 0;
         invoiceData.sub_total = (parseInt(data.perWeek) * parseInt(invoiceData.weeks));
-        invoiceData.total = ( (invoiceData.sub_total + remaining + bonus) - (invoiceData.per_day * holidays) );
+        invoiceData.total = getTotal(invoiceData);
 
         //fill data
         fillData(invoiceData);
@@ -82,6 +82,12 @@ function invoiceGenerator(userId, data) {
 
                 deferred.resolve(fullPath);
             });
+        }
+
+        function getTotal(invoiceData) {
+            var total = (invoiceData.sub_total + invoiceData.remaining + invoiceData.bonus);
+            var totalOfHolidays = (invoiceData.per_day * holidays);
+            return ( total - totalOfHolidays );
         }
     }
 
