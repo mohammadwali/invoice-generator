@@ -1,6 +1,7 @@
 var mongoose = require("mongoose");
+var moment = require("moment");
 var Schema = mongoose.Schema;
-var modelname = "User";
+var ModelName = "User";
 var UserSchema = new Schema({
     name: String,
     email: {
@@ -75,12 +76,12 @@ UserSchema.pre("save", function (next) {
 
 
 UserSchema.statics.addInvoice = function (email, invoiceObject, cb) {
-    return this.model(modelname)
+    return this.model(ModelName)
         .update({email: email}, {$push: {invoice_history: invoiceObject}}, cb);
 };
 
 UserSchema.statics.setDeliveryStatus = function (email, fileName, statusObject, cb) {
-    return this.model(modelname).update({
+    return this.model(ModelName).update({
         email: email,
         "invoice_history.file_name": fileName
     }, {
@@ -90,5 +91,17 @@ UserSchema.statics.setDeliveryStatus = function (email, fileName, statusObject, 
     }, cb);
 };
 
+UserSchema.statics.hasGeneratedThisMonthInvoice = function (userEmail, cb) {
+    return this.model(ModelName).find({
+        email: userEmail,
+        "invoice_history.month": moment().format("M")
+    }, function (err, result) {
+        if (err) {
+            throw err;
+        }
+        cb(err, result.length > 0);
+    });
+};
 
-module.exports = mongoose.model(modelname, UserSchema);
+
+module.exports = mongoose.model(ModelName, UserSchema);

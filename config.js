@@ -10,8 +10,9 @@ module.exports = {
         prefixDateFormat: "DD_MM_YYYY"
     },
     cronJob: {
-//        pattern: "0 0 * * *", // Run once a day at midnight
-        pattern: "* * * * *",
+//      pattern: "0 0 * * *", // Run once a day at midnight
+        pattern: "* * * * *", // every minute
+//      pattern: "* * * * * *", // every sec
         autoStart: true,
         timeZone: "Asia/Kolkata"
     }

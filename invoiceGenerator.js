@@ -2,13 +2,15 @@ var config = require("./config");
 var Q = require("q");
 var path = require("path");
 var moment = require("moment");
-var User = require("./models/user.model"); //initialize model
+var UserModel = require("./models/user.model"); //initialize model
 var fs = require("fs");
 
 module.exports = invoiceGenerator;
 
 
-function invoiceGenerator(userId, data) {
+function invoiceGenerator(user) {
+    var data = setDataObject(user);
+    var userId = user._id;
     var excelbuilder = require("msexcel-builder");
     var deferred = Q.defer();
     var start = data.startDate;
@@ -71,9 +73,10 @@ function invoiceGenerator(userId, data) {
 
             var fullPath = path.resolve(path.join(dirPath, fileName));
 
-            User.addInvoice(data.userEmail, {
+            UserModel.addInvoice(data.userEmail, {
                 file_name: fileName,
                 full_path: fullPath,
+                month: moment(invoiceData.end, config.dateFormat).format("M"),
                 invoice_data: invoiceData
             }, function (err) {
 
@@ -142,6 +145,16 @@ function invoiceGenerator(userId, data) {
         return dir;
     }
 
+    function setDataObject(user) {
+        return {
+            perWeek: user.pay_info.per_week,
+            userEmail: user.email,
+            startDate: "10/17/2016", // TODO get last invoice date here
+            endDate: moment().format(config.dateFormat), // TODO this will be the closest date possible
+            paypalEmail: user.pay_info.paypal_email,
+            holidays: 0 // TODO get holidays from user object
+        }
+    }
 
 }
 
