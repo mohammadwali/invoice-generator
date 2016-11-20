@@ -7,6 +7,8 @@ var config = require("./config");
 var dbURI = "mongodb://heroku_0n39t29l:d6kjm84q965cpqpar2h99344n8@ds159237.mlab.com:59237/heroku_0n39t29l";
 var port = process.env.PORT || 3000;
 var path = require("path");
+var CronJob = require('cron').CronJob;
+var CRONJOB = null;
 
 
 //Creating connection with MongoDB
@@ -46,6 +48,14 @@ app.use(errorHandler);
 // initialize app
 app.listen(port);
 
+//TODO setup cron here
+CRONJOB = new CronJob({
+    cronTime: config.cronJob.pattern,
+    onTick: onCronTick,
+    start: config.cronJob.autoStart,
+    timeZone: config.cronJob.timeZone
+});
+
 // If the Node process ends
 process.on("SIGINT", onProcessEnd);
 
@@ -66,6 +76,12 @@ function onDBError(err) {
 function onDBClose() {
     console.log("Mongoose default connection disconnected");
 }
+
+
+function onCronTick() {
+    console.log("Running cron...");
+}
+
 
 function generateInvoice(req, res, next) {
     // grab the user model
