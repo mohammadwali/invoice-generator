@@ -86,7 +86,7 @@ function generateInvoice(req, res, next) {
             startDate: "10/17/2016", // TODO get last invoice date here
             endDate: moment().format(config.dateFormat), // TODO this will be the closest date possible
             paypalEmail: user.pay_info.paypal_email,
-            holidays: 1
+            holidays: 0
         }).then(onInvoiceGenerate, onError);
 
 
