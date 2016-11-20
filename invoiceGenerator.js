@@ -86,7 +86,7 @@ function invoiceGenerator(userId, data) {
 
         function getTotal(invoiceData) {
             var total = (invoiceData.sub_total + invoiceData.remaining + invoiceData.bonus);
-            var totalOfHolidays = (invoiceData.per_day * holidays);
+            var totalOfHolidays = (invoiceData.per_day * invoiceData.holidays);
             return ( total - totalOfHolidays );
         }
     }
