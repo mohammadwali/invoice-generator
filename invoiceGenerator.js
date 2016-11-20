@@ -38,6 +38,7 @@ function invoiceGenerator(userId, data) {
         invoiceData.bonus = parseInt(data.bonus) || 0;
         invoiceData.sub_total = (parseInt(data.perWeek) * parseInt(invoiceData.weeks));
         invoiceData.total = getTotal(invoiceData);
+        invoiceData.paypal_email = data.paypalEmail;
 
         //fill data
         fillData(invoiceData);
@@ -60,7 +61,7 @@ function invoiceGenerator(userId, data) {
             addColumns([{title: "Bonus"}, data.bonus]);
             addColumns([{title: "Total excluding holidays"}, data.total]);
             addEmptyRow();
-            addColumns([{title: "PayPal Email"}, data.paypalEmail]);
+            addColumns([{title: "PayPal Email"}, data.paypal_email]);
         }
 
         function onWorkBookSave(err) {
