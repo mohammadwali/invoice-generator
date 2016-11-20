@@ -27,31 +27,41 @@ function invoiceGenerator(userId, data) {
 
     /////////////////////////
     function init() {
-        var perWeek = data.perWeek;
-        var perDay = (perWeek / 5);
-        var holidays = data.holidays || 0;
-        var weeks = getWeeksInRange(start, end);
-        var remaining = parseInt(data.remaining) || 0;
-        var bonus = parseInt(data.bonus) || 0;
-        var subTotal = (parseInt(data.perWeek) * parseInt(weeks));
-        var total = ( (subTotal + remaining + bonus) - (perDay * holidays) );
+        var invoiceData = {};
+        invoiceData.start = start;
+        invoiceData.end = end;
+        invoiceData.per_week = data.perWeek;
+        invoiceData.per_day = (invoiceData.per_week / 5);
+        invoiceData.holidays = data.holidays || 0;
+        invoiceData.weeks = getWeeksInRange(start, end);
+        invoiceData.remaining = parseInt(data.remaining) || 0;
+        invoiceData.bonus = parseInt(data.bonus) || 0;
+        invoiceData.sub_total = (parseInt(data.perWeek) * parseInt(invoiceData.weeks));
+        invoiceData.total = ( (invoiceData.sub_total + remaining + bonus) - (invoiceData.per_day * holidays) );
 
         //fill data
-        addColumns([{title: "Per Week"}, {title: "Weeks"}, {title: "From"}, {title: "To"}]);
-        addColumns([perWeek, weeks, start, end]);
-        addEmptyRow();
-        addColumns([{title: "Holidays after limit"}, holidays]);
-        addColumns([{title: "Sub-Total"}, subTotal]);
-        addColumns([{title: "Remaining"}, remaining]);
-        addColumns([{title: "Bonus"}, bonus]);
-        addColumns([{title: "Total excluding holidays"}, total]);
-        addEmptyRow();
-        addColumns([{title: "PayPal Email"}, data.paypalEmail]);
+        fillData(invoiceData);
 
         // Save it
         workbook.save(onWorkBookSave);
 
         return deferred.promise;
+
+
+        /////////////////////////
+
+        function fillData(data) {
+            addColumns([{title: "Per Week"}, {title: "Weeks"}, {title: "From"}, {title: "To"}]);
+            addColumns([data.per_week, data.weeks, data.start, data.end]);
+            addEmptyRow();
+            addColumns([{title: "Holidays after limit"}, data.holidays]);
+            addColumns([{title: "Sub-Total"}, data.sub_total]);
+            addColumns([{title: "Remaining"}, data.remaining]);
+            addColumns([{title: "Bonus"}, data.bonus]);
+            addColumns([{title: "Total excluding holidays"}, data.total]);
+            addEmptyRow();
+            addColumns([{title: "PayPal Email"}, data.paypalEmail]);
+        }
 
         function onWorkBookSave(err) {
             if (err) {
@@ -60,13 +70,10 @@ function invoiceGenerator(userId, data) {
 
             var fullPath = path.resolve(path.join(dirPath, fileName));
 
-
             User.addInvoice(data.userEmail, {
                 file_name: fileName,
                 full_path: fullPath,
-                total: total,
-                start_date: start,
-                end_date: end
+                invoice_data: invoiceData
             }, function (err) {
 
                 if (err) {

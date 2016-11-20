@@ -80,20 +80,14 @@ UserSchema.statics.addInvoice = function (email, invoiceObject, cb) {
 };
 
 UserSchema.statics.setDeliveryStatus = function (email, fileName, statusObject, cb) {
-
-
-    return this.model(modelname).update(
-        {
-            email: email,
-            "invoice_history.file_name": fileName
-        },
-        {
-            $set: {
-                'invoice_history.$.delivery_status': statusObject
-            }
-        }, cb);
-
-
+    return this.model(modelname).update({
+        email: email,
+        "invoice_history.file_name": fileName
+    }, {
+        $set: {
+            'invoice_history.$.delivery_status': statusObject
+        }
+    }, cb);
 };
 
 
